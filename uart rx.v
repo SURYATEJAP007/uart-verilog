@@ -1,0 +1,80 @@
+module uart_rx(
+    input clk, rst,
+    input rx, baud_tick,
+    output reg [7:0] data_out,
+    output reg rx_done
+);
+
+    parameter IDLE  = 2'b00;
+    parameter START = 2'b01;
+    parameter DATA  = 2'b10;
+    parameter STOP  = 2'b11;
+
+    reg [1:0] state;
+    reg [3:0] tick_cnt;
+    reg [2:0] bit_cnt;
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            state    <= 2'b00;
+            tick_cnt <= 4'd0;
+            bit_cnt  <= 3'd0;
+            data_out <= 8'd0;
+            rx_done  <= 1'b0;
+        end
+        else begin
+            case (state)
+
+                IDLE: begin
+                    rx_done <= 0;
+                    if (rx==0)      
+                        state <= START;
+                end
+
+                START: begin
+                    if (baud_tick) begin
+                        if (tick_cnt == 7) begin  
+                            tick_cnt <= 0;
+                            state    <= DATA;
+                        end
+                        else
+                            tick_cnt <= tick_cnt+1;
+                    end
+                end
+
+                DATA: begin
+                    if (baud_tick) begin
+                        if (tick_cnt == 8) begin  
+                            data_out[bit_cnt] <=rx; 
+                        end
+                        if (tick_cnt == 15) begin 
+                            tick_cnt <= 0;
+                            if (bit_cnt == 7) begin 
+                                bit_cnt <= 0;
+                                state   <= STOP;
+                            end
+                            else
+                                bit_cnt <= bit_cnt+1;
+                        end
+                        else
+                            tick_cnt <= tick_cnt+1;
+                    end
+                end
+
+                STOP: begin
+                    if (baud_tick) begin
+                        if (tick_cnt == 15) begin
+                            rx_done  <= 1;
+                            tick_cnt <= 0;
+                            state    <= IDLE;
+                        end
+                        else
+                            tick_cnt <= tick_cnt+1;
+                    end
+                end
+
+            endcase
+        end
+    end
+
+endmodule
