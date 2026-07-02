@@ -4,7 +4,7 @@ module uart_testbench;
     wire [7:0] data_out;
     wire tx_done, rx_done;
 
-  uaart_top uut(
+  uart_top uut(
         .clk      (clk),
         .rst      (rst),
         .tx_start (tx_start),
