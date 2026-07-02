@@ -1,4 +1,4 @@
-module uaart_top(
+module uart_top(
 input clk, rst, tx_start,
 input [7:0] data_in,
 output [7:0]data_out, 
