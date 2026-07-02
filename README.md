@@ -45,3 +45,6 @@ baud_gen → baud_tick → uart_tx → serial_line → uart_rx
 - Midpoint sampling for noise immunity
 - Asynchronous reset
 - Structural modeling at top level
+
+## Simulation Waveform
+![UART Waveform](waveform.png)
